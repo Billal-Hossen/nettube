@@ -19,3 +19,5 @@ const main = async () => {
     console.log("Database connection error!!", error)
   }
 }
+
+main()

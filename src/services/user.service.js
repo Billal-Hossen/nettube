@@ -9,7 +9,8 @@ const createUser = async (newUser) => {
 }
 
 const findUserById = async (id) => {
-  return await User.findById(id).select("-password -refreshToken")
+  const user = await User.findById(id).select("-password -refreshToken")
+  return { ...user._doc, id: user.id }
 }
 
 export { userFindByField, createUser, findUserById }

@@ -10,6 +10,7 @@ import { uploadFileOnCloudinary } from "../utils/cloudinary.js";
 const register = asyncHandler(async (req, res, next) => {
 
   const { username, email, fullname, password } = req.body
+  console.log({ username, email, fullname, password })
   if ([username, email, fullname, password].some(field => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required")
   }
@@ -19,7 +20,7 @@ const register = asyncHandler(async (req, res, next) => {
     throw new ApiError(409, "User  with username or email already exists")
   }
 
-  const avatarLocalPath = req.files?.avatar[0]?.path
+  const avatarLocalPath = req.files?.avatar[0]?.path;
   const coverLocalPath = req.files?.coverImg[0]?.path
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar is required")
@@ -36,7 +37,7 @@ const register = asyncHandler(async (req, res, next) => {
     email,
     password,
     avatar: avatar.url,
-    coverImg: coverImg.url || ""
+    coverImg: coverImg?.url || ""
   }
 
   const user = await createUser(newUserObj)
@@ -46,24 +47,9 @@ const register = asyncHandler(async (req, res, next) => {
   }
 
   res.status(201).json(
-    new ApiResponse(200, "User registed successfully", { ...createUser, id: createUser._id })
+    new ApiResponse(200, createdUser, "User registered Successfully")
   )
-
-
-
-
-
-
-
-
-
-
-
-
-
-  res.status(200).json({
-    message: "controller okay!!"
-  })
 })
+
 
 export { register }
