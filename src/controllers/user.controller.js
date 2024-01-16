@@ -1,4 +1,4 @@
-import { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate } from "../services/user.service.js";
+import { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate, changePasswordService } from "../services/user.service.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -58,7 +58,6 @@ const register = asyncHandler(async (req, res, next) => {
 
 const login = asyncHandler(async (req, res, next) => {
   const { username, email, password } = req.body
-  console.log({ username, email, password })
   if (!username && !email) {
     throw new ApiError(400, "username or email and password required")
   }
@@ -113,5 +112,18 @@ const logout = asyncHandler(async (req, res, next) => {
 
 })
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res.status(200).json(new ApiResponse(200, req?.user, "This is current user"))
+})
 
-export { register, login, logout }
+const changePassword = asyncHandler(async (req, res) => {
+  const { newPassword, oldPassword } = req.body
+  if (!newPassword && !oldPassord) {
+    throw new ApiError(400, "new and old password requird")
+  }
+  await changePasswordService({ newPassword, oldPassword, id: req.user?._id })
+  return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"))
+})
+
+
+export { register, login, logout, getCurrentUser, changePassword }

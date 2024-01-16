@@ -19,9 +19,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
     const user = await User.findById(userId)
 
     const accessToken = user.generateAccessToken()
-    console.log("object user", { accessToken })
     const refreshToken = user.generateRefreshToken()
-    console.log("object user", { accessToken, refreshToken })
     user.refreshToken = refreshToken
     await user.save({ validateBeforeSave: false })
     return { accessToken, refreshToken }
@@ -36,4 +34,15 @@ const findByIdAndUpdate = async (id, updatedate = {}) => {
   }, { new: true })
 }
 
-export { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate }
+const changePasswordService = async ({ newPassword, oldPassword, id }) => {
+  const user = await User.findById(id)
+  const isPasswordValid = await user.isCorrectPassword(oldPassword)
+  console.log(isPasswordValid)
+  if (!isPasswordValid) {
+    throw new ApiError(400, "Invalid old password")
+  }
+  user.password = newPassword
+  return await user.save({ validateBeforeSave: false })
+}
+
+export { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate, changePasswordService }
