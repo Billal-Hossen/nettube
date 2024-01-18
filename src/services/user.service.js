@@ -31,7 +31,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const findByIdAndUpdate = async (id, updatedate = {}) => {
   return await User.findByIdAndUpdate(id, {
     $set: updatedate
-  }, { new: true })
+  }, { new: true }).select("-password -refreshToken")
 }
 
 const changePasswordService = async ({ newPassword, oldPassword, id }) => {

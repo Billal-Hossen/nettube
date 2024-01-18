@@ -125,5 +125,27 @@ const changePassword = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"))
 })
 
+const userFileUpdate = async (fileName, req) => {
+  const imageLocalPath = req.file.path
+  if (!imageLocalPath) {
+    throw new ApiError(400, `${fileName} is required`)
+  }
+  const image = await uploadFileOnCloudinary(imageLocalPath)
+  if (!image?.url) {
+    throw new ApiError(400, `Error while uploading on ${fileName}`)
+  }
 
-export { register, login, logout, getCurrentUser, changePassword }
+  return await findByIdAndUpdate(req.user?._id, { [fileName]: image.url })
+
+}
+const updateAvatar = asyncHandler(async (req, res) => {
+  const user = await userFileUpdate("avatar", req)
+  res.status(200).json(new ApiResponse(200, user, "Avatar is updated"))
+})
+
+const updateCoverImg = asyncHandler(async (req, res) => {
+  const user = await userFileUpdate("coverImg", req)
+  res.status(200).json(new ApiResponse(200, user, "coverImg is updated"))
+})
+
+export { register, login, logout, getCurrentUser, changePassword, updateAvatar, updateCoverImg }
