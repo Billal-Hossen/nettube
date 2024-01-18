@@ -1,4 +1,4 @@
-import { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate, changePasswordService } from "../services/user.service.js";
+import { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate, changePasswordService, getUserChannelProfileService } from "../services/user.service.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -148,4 +148,17 @@ const updateCoverImg = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, user, "coverImg is updated"))
 })
 
-export { register, login, logout, getCurrentUser, changePassword, updateAvatar, updateCoverImg }
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params
+  const id = req.user?._id
+  if (!username?.trim()) {
+    throw new ApiError(400, "Missing the username")
+  }
+  const channel = await getUserChannelProfileService(id, username)
+  if (!channel.length) {
+    throw new ApiError(404, "Channel does not exist")
+  }
+  return res.status(200).json(new ApiResponse(200, channel[0], "User channel fetched successfully"))
+})
+
+export { register, login, logout, getCurrentUser, changePassword, updateAvatar, updateCoverImg, getUserChannelProfile }

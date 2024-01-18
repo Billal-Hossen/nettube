@@ -45,4 +45,61 @@ const changePasswordService = async ({ newPassword, oldPassword, id }) => {
   return await user.save({ validateBeforeSave: false })
 }
 
-export { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate, changePasswordService }
+const getUserChannelProfilePipeline = (id, username) => {
+  return [
+    {
+      $match: { username: username.toLowerCase() }
+    },
+    {
+      $lookup: {
+        from: "subcriptions",
+        localField: "_id",
+        forignField: "subcriber",
+        as: "subcribers"
+      }
+    },
+    {
+      $lookup: {
+        from: "subcriptions",
+        localField: "_id",
+        forignField: "channel",
+        as: "subcribersTo"
+      }
+    },
+    {
+      $addFields: {
+        subceibersCount: {
+          $size: "$subcribers"
+        },
+        subcribersToCount: {
+          $size: "$subcribersTo"
+        },
+        isSubcribed: {
+          $cond: {
+            if: { $in: [id, "$subcribers.subcriber"] },
+            then: true,
+            else: false
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        username: 1,
+        fullname: 1,
+        email: 1,
+        avatar: 1,
+        coverImg: 1,
+        subceibersCount,
+        subcribersToCount,
+        isSubcribed
+      }
+    }
+  ]
+}
+
+const getUserChannelProfileService = async (id, username) => {
+  return await User.aggregate(getUserChannelProfilePipeline(id, username))
+}
+
+export { userFindByField, createUser, findUserById, generateAccessAndRefreshTokens, findByIdAndUpdate, changePasswordService, getUserChannelProfileService }
